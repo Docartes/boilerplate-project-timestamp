@@ -24,41 +24,44 @@ app.get("/api/hello", function (req, res) {
 	res.json({greeting: 'hello API'});
 });
 
-app.get('/api', (req, res) => {
-	const date = new Date()
-	const unix = date.getTime();
+// app.get('/api', (req, res) => {
+// 	const date = new Date()
+// 	const unix = date.getTime();
 
-	res.send({
-		unix: unix, 
-		date: date.toGMTString()
-	})
-})
+// 	res.send({
+// 		unix: unix, 
+// 		date: date.toUTCString()
+// 	})
+// })
 
-app.get('/api/:date', (req, res) => {
+const isInvalid = (date) => {
+	return date !== new Date(date);
+}
+
+app.get('/api/:date?', (req, res) => {
 	const { date } = req.params;
-	let tanggal = new Date(date)
-	console.log(tanggal)
-	let unix = tanggal.getTime()
 
-	if (tanggal == 'Invalid Date') {
-		res.send({
-			error: 'Invalid Date'
+	if ( date === undefined ) {
+		return res.json({
+			unix: new Date().valueOf(),
+			utc: new Date().toUTCString()
+		})
+	} else if ( Date.parse(date) ) {
+		return res.json({
+			unix: new Date(date).valueOf(),
+			utc: new Date(date).toUTCString()
+		})
+	} else if ( date.length == 13 ) {
+		return res.json({
+			unix: new Date(parseInt(date)).valueOf(),
+			utc: new Date(parseInt(date)).toUTCString()
 		})
 	} else {
-		if (parseInt(date).toString().length !== 4) {
-			let t = new Date(parseInt(date))
-			res.send({
-				unix: date,
-				date: t.toGMTString()
-			})
-		} else {
-			res.send({
-				unix: unix,
-				date: tanggal.toGMTString()
-			})
-		}
+		return res.json({
+			error: 'Invalid Date'
+		})
 	}
-	
+
 })
 
 
